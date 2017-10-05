@@ -4,6 +4,7 @@ from pygame.locals import *
 from sys import exit
 from random import randrange
 
+
 def main():
     pygame.init()
     pygame.font.init()
