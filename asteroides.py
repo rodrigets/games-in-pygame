@@ -7,8 +7,9 @@ from random import randrange
 counter=0
 def main():
 
+    pygame.mixer.pre_init(44100, -16, 2, 4096)
     pygame.init()
-    pygame.mixer.pre_init(44100, 32, 2, 4096)
+
     pygame.font.init()
 
 
@@ -185,9 +186,6 @@ def main():
         # speed of movement of background
         background_position += 2
 
-        move_asteroids()
-
-        #screen.blit(background, (0, 0))
 
         move_asteroids()
         move_shots()
