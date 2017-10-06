@@ -17,7 +17,7 @@ def main():
 
     screen = pygame.display.set_mode((956, 560), 0, 32)
 
-    background_filename = 'bg_big.png'
+    background_filename = 'seamless_space.png'
     background = pygame.image.load(background_filename).convert()
 
     ship = {
@@ -126,6 +126,8 @@ def main():
 
     collided = False
     collision_animation_counter = 0
+    
+    background_position = 0
 
     while True:
 
@@ -164,8 +166,26 @@ def main():
 			# set timer for next possible shot
 			ticks_to_shot = 15
 			
+		
+		# moving the background to simulate space travel
+		# blint background relative to position of prior iteration
+        rel_pos = background_position % background.get_rect().height
+        
+        # positioning takes height of backdrop into account
+        screen.blit(background, (0, rel_pos - background.get_rect().height))
+        
+        # end of backdrop is reached
+        if rel_pos < 560:
+            screen.blit(background, (0, rel_pos))
+        
+        # speed of movement of background
+        background_position += 2
+		
 
-        screen.blit(background, (0, 0))
+		
+        move_asteroids()
+		
+        #screen.blit(background, (0, 0))
 
         move_asteroids()
         move_shots()
