@@ -6,9 +6,11 @@ from random import randrange
 
 
 def main():
+
     pygame.init()
-    pygame.font.init()
     pygame.mixer.pre_init(44100, 32, 2, 4096)
+    pygame.font.init()
+
 
     font_name = pygame.font.get_default_font()
     game_font = pygame.font.SysFont(font_name, 72)
@@ -36,9 +38,14 @@ def main():
         },
         'rect': Rect(0, 0, 48, 48)
     }
-
+	
+	# sounds
     explosion_sound = pygame.mixer.Sound('boom.wav')
     explosion_played = False
+    
+    fire_sound = pygame.mixer.Sound('shot.ogg')
+    fire_played = False
+    
     pygame.display.set_caption('Asteroides')
 
     clock = pygame.time.Clock()
@@ -53,8 +60,45 @@ def main():
 
     ticks_to_asteroid = 90
     asteroids = []
-
-
+    
+    # counter to prevent permanent fire
+    ticks_to_shot = 15
+    shots = []
+    
+    def create_shot(ship):
+		# load image of bullet
+	    surf = pygame.image.load('bullet.png')
+	    # scale it to smaller size
+	    surf = pygame.transform.scale(surf,(10,10))
+	    ship_rect = get_rect(ship)
+	    
+	    return {
+		    'surface': surf.convert_alpha(),
+		    # create shot on tip of the ship
+		    'position': [(ship_rect[0] + 0.5*ship_rect[2]) - 5,
+		     ship_rect[1]],
+		    'speed': 5
+		}
+	
+    def move_shots():
+	    for shot in shots:
+		    shot['position'][1] -= shot['speed']
+	
+    def remove_missed_shots():
+		# remove shots from game that leave screen
+	    for shot in shots:
+		    if shot['position'][1] < 0:
+			        shots.remove(shot)
+    
+    def shoot_asteroids():
+		# check for collisions between shots and asteroids
+		for shot in shots:
+			shot_rect = get_rect(shot)
+			for asteroid in asteroids:
+				if shot_rect.colliderect(get_rect(asteroid)):
+				    shots.remove(shot)
+				    asteroids.remove(asteroid)
+				
     def move_asteroids():
         for asteroid in asteroids:
             asteroid['position'][1] += asteroid['speed']
@@ -90,6 +134,7 @@ def main():
             asteroids.append(create_asteroid())
         else:
             ticks_to_asteroid -= 1
+        
 
         ship['speed'] = {
             'x': 0,
@@ -111,14 +156,28 @@ def main():
             ship['speed']['x'] = -5
         elif pressed_keys[K_RIGHT]:
             ship['speed']['x'] = 5
+        
+        if pressed_keys[K_SPACE] and ticks_to_shot <= 0:
+			# play sound
+			fire_sound.play()
+			shots.append(create_shot(ship))
+			# set timer for next possible shot
+			ticks_to_shot = 15
+			
 
         screen.blit(background, (0, 0))
 
         move_asteroids()
-
+        move_shots()
+        shoot_asteroids()
+		
         for asteroid in asteroids:
             screen.blit(asteroid['surface'], asteroid['position'])
-
+        
+        for shot in shots:
+			screen.blit(shot['surface'], shot['position'])
+		
+		
         if not collided:
             collided = ship_collided()
             ship['position'][0] += ship['speed']['x']
@@ -154,7 +213,9 @@ def main():
 
         pygame.display.update()
         time_passed = clock.tick(30)
+        ticks_to_shot -= 1
 
         remove_used_asteroids()
+        remove_missed_shots()
 
 main()
