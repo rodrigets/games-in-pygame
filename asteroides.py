@@ -133,10 +133,6 @@ def main():
     
     background_position = 0
 
-    def update_score(score):
-        text_score = game_font.render('Score: '+str(score), 13, (255, 0, 0))
-        screen.blit(text_score, (640, 500))
-
     while True:
 
         if not ticks_to_asteroid:
