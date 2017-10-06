@@ -4,7 +4,7 @@ from pygame.locals import *
 from sys import exit
 from random import randrange
 
-
+counter=0
 def main():
 
     pygame.init()
@@ -15,7 +15,7 @@ def main():
     font_name = pygame.font.get_default_font()
     game_font = pygame.font.SysFont(font_name, 72)
 
-    screen = pygame.display.set_mode((956, 560), 0, 32)
+    screen = pygame.display.set_mode((956, 560))
 
     background_filename = 'seamless_space.png'
     background = pygame.image.load(background_filename).convert()
@@ -50,7 +50,9 @@ def main():
 
     clock = pygame.time.Clock()
 
-
+    global counter
+    t=game_font.render("Score : "+str(counter),1,(255, 0, 0))
+    screen.blit(t,(700,2))
     def create_asteroid():
         return {
             'surface': pygame.image.load('asteroid.png').convert_alpha(),
@@ -92,12 +94,14 @@ def main():
     
     def shoot_asteroids():
 		# check for collisions between shots and asteroids
-		for shot in shots:
-			shot_rect = get_rect(shot)
-			for asteroid in asteroids:
-				if shot_rect.colliderect(get_rect(asteroid)):
-				    shots.remove(shot)
-				    asteroids.remove(asteroid)
+        for shot in shots:
+            shot_rect = get_rect(shot)
+            for asteroid in asteroids:
+                if shot_rect.colliderect(get_rect(asteroid)):
+                    shots.remove(shot)
+                    asteroids.remove(asteroid)
+                    global counter
+                    counter+=5
 				
     def move_asteroids():
         for asteroid in asteroids:
@@ -161,10 +165,10 @@ def main():
         
         if pressed_keys[K_SPACE] and ticks_to_shot <= 0:
 			# play sound
-			fire_sound.play()
-			shots.append(create_shot(ship))
+            fire_sound.play()
+            shots.append(create_shot(ship))
 			# set timer for next possible shot
-			ticks_to_shot = 15
+            ticks_to_shot = 15
 			
 		
 		# moving the background to simulate space travel
@@ -190,12 +194,13 @@ def main():
         move_asteroids()
         move_shots()
         shoot_asteroids()
-		
+        t=game_font.render("Score : "+str(counter),True,(255, 0, 0))
+        screen.blit(t,(700,2))
         for asteroid in asteroids:
             screen.blit(asteroid['surface'], asteroid['position'])
         
         for shot in shots:
-			screen.blit(shot['surface'], shot['position'])
+            screen.blit(shot['surface'], shot['position'])
 		
 		
         if not collided:
@@ -222,6 +227,7 @@ def main():
                 pressed_keys = pygame.key.get_pressed()
 
                 if pressed_keys[K_r]:
+                    counter=0
                     main()
 
             else:
