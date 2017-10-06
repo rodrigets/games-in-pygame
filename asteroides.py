@@ -22,7 +22,7 @@ def main():
 
     ship = {
         'surface': pygame.image.load('ship.png').convert_alpha(),
-        'position': [randrange(956), randrange(560)],
+        'position': [randrange(-10, 918), randrange(-10, 520)],
         'speed': {
             'x': 0,
             'y': 0
@@ -159,9 +159,9 @@ def main():
             ship['speed']['y'] = 5
 
         if pressed_keys[K_LEFT]:
-            ship['speed']['x'] = -5
+            ship['speed']['x'] = -10
         elif pressed_keys[K_RIGHT]:
-            ship['speed']['x'] = 5
+            ship['speed']['x'] = 10
         
         if pressed_keys[K_SPACE] and ticks_to_shot <= 0:
             # play sound
@@ -204,8 +204,11 @@ def main():
 
         if not collided:
             collided = ship_collided()
-            ship['position'][0] += ship['speed']['x']
-            ship['position'][1] += ship['speed']['y']
+            if ((ship['position'][0] + ship['speed']['x']) > -10) and ((ship['position'][0] + ship['speed']['x']) < 918):
+                ship['position'][0] += ship['speed']['x']
+
+            if (ship['position'][1] + ship['speed']['y'] > -10) and (ship['position'][1] + ship['speed']['y'] < 520):
+                ship['position'][1] += ship['speed']['y']
 
             screen.blit(ship['surface'], ship['position'])
         else:
