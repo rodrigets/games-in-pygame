@@ -1,15 +1,18 @@
 #! /usr/bin/env python
-import pygame
-# from pygame.locals import *
+import os
 from sys import exit
 from random import randrange
+
+import pygame
+
+RES_FOLDER = 'resources'
 
 counter = 0
 
 
 def create_shot(spaceship):
     # load image of bullet
-    surf = pygame.image.load('bullet.png')
+    surf = pygame.image.load(os.path.join(RES_FOLDER, 'bullet.png'))
     # scale it to smaller size
     surf = pygame.transform.scale(surf, (10, 10))
     ship_rect = get_rect(spaceship)
@@ -19,7 +22,7 @@ def create_shot(spaceship):
         # create shot on tip of the ship
         'position': [(ship_rect[0] + 0.5 * ship_rect[2]) - 5,
                      ship_rect[1]],
-        'speed': 5
+        'speed': 5,
     }
 
 
@@ -74,7 +77,8 @@ def ship_collided(ship, asteroids):
 
 def create_asteroid():
     return {
-        'surface': pygame.image.load('asteroid.png').convert_alpha(),
+        'surface': pygame.image.load(
+            os.path.join(RES_FOLDER, 'asteroid.png')).convert_alpha(),
         'position': [randrange(892), -64],
         'speed': randrange(1, 11)
     }
@@ -92,14 +96,18 @@ def main():
     screen = pygame.display.set_mode((956, 560))
 
     # list to store multiple background images.
-    background_images = ['seamless_space.png', 'bg_big.png']
+    background_images = [
+        os.path.join(RES_FOLDER, 'seamless_space.png'),
+        os.path.join(RES_FOLDER, 'bg_big.png'),
+    ]
     background_images_counter = 0
     background = pygame.image.load(
         background_images[background_images_counter]).convert()
     background_flag = 0
 
     ship = {
-        'surface': pygame.image.load('ship.png').convert_alpha(),
+        'surface': pygame.image.load(
+            os.path.join(RES_FOLDER, 'ship.png')).convert_alpha(),
         'position': [randrange(-10, 918), randrange(-10, 520)],
         'speed': {
             'x': 0,
@@ -108,7 +116,8 @@ def main():
     }
 
     exploded_ship = {
-        'surface': pygame.image.load('ship_exploded.png').convert_alpha(),
+        'surface': pygame.image.load(
+            os.path.join(RES_FOLDER, 'ship_exploded.png')).convert_alpha(),
         'position': [],
         'speed': {
             'x': 0,
@@ -118,10 +127,10 @@ def main():
     }
 
     # sounds
-    explosion_sound = pygame.mixer.Sound('boom.wav')
+    explosion_sound = pygame.mixer.Sound(os.path.join(RES_FOLDER, 'boom.wav'))
     explosion_played = False
 
-    fire_sound = pygame.mixer.Sound('shot.ogg')
+    fire_sound = pygame.mixer.Sound(os.path.join(RES_FOLDER, 'shot.ogg'))
 
     pygame.display.set_caption('Asteroides')
 
