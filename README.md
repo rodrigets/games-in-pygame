@@ -8,10 +8,19 @@ Install dependencies by running `pip install -r requirements.txt`
 ## Asteroides:
 
 ### Usage:
-Run `python asteroides.py` to start the game.
 
-Use arrow keys to move up, down, left and right on the canvas.  
-Use space bar to shoot.
+To start the game run 
+
+    python asteroides.py
+
+Use arrow keys to move on canvas:
+
+* <kbd>&rightarrow;</kbd>: move right
+* <kbd>&leftarrow;</kbd>: move left
+* <kbd>&uparrow;</kbd>: move up
+* <kbd>&downarrow;</kbd>: move down
+
+and <kbd>space</kbd> bar to shoot.
 
 
 ## License:
