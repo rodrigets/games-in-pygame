@@ -17,8 +17,11 @@ def main():
 
     screen = pygame.display.set_mode((956, 560))
 
-    background_filename = 'seamless_space.png'
-    background = pygame.image.load(background_filename).convert()
+    # list to store multiple background images.
+    background_images = ['seamless_space.png','bg_big.png']  
+    background_images_counter = 0
+    background = pygame.image.load(background_images[background_images_counter]).convert()
+    background_flag = 0
 
     ship = {
         'surface': pygame.image.load('ship.png').convert_alpha(),
@@ -243,6 +246,14 @@ def main():
         time_passed = clock.tick(30)
         ticks_to_shot -= 1
 
+        if counter%20 == 0 and counter != 0 and background_flag == 0:
+            background_images_counter += 1
+            if len(background_images):    
+                background = pygame.image.load(background_images[background_images_counter%len(background_images)]).convert()
+                background_flag = 1
+        elif counter%20 != 0:
+            background_flag = 0    
+        
         remove_used_asteroids()
         remove_missed_shots()
 
