@@ -134,8 +134,6 @@ def main():
 
     pygame.display.set_caption('Asteroides')
 
-    clock = pygame.time.Clock()
-
     global counter
     t = game_font.render("Score : " + str(counter), 1, (255, 0, 0))
     screen.blit(t, (700, 2))
@@ -151,6 +149,9 @@ def main():
     collision_animation_counter = 0
 
     background_position = 0
+
+    # Clock to control FPS
+    clock = pygame.time.Clock()
 
     while True:
 
@@ -259,7 +260,6 @@ def main():
                 collision_animation_counter += 1
 
         pygame.display.update()
-        time_passed = clock.tick(30)
         ticks_to_shot -= 1
 
         if counter % 20 == 0 and counter != 0 and background_flag == 0:
@@ -276,6 +276,9 @@ def main():
 
         remove_used_asteroids(asteroids)
         remove_missed_shots(shots)
+
+        # FPS control: 30 FPS
+        clock.tick(60)
 
 
 main()
