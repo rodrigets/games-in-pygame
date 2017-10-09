@@ -22,7 +22,7 @@ def create_shot(spaceship):
         # create shot on tip of the ship
         'position': [(ship_rect[0] + 0.5 * ship_rect[2]) - 5,
                      ship_rect[1]],
-        'speed': 5,
+        'speed': 8,
     }
 
 
@@ -80,7 +80,7 @@ def create_asteroid():
         'surface': pygame.image.load(
             os.path.join(RES_FOLDER, 'asteroid.png')).convert_alpha(),
         'position': [randrange(892), -64],
-        'speed': randrange(1, 11)
+        'speed': randrange(3, 9)
     }
 
 
@@ -99,7 +99,7 @@ def main():
     background_images = [
         os.path.join(RES_FOLDER, 'seamless_space.png'),
         os.path.join(RES_FOLDER, 'bg_big.png'),
-		os.path.join(RES_FOLDER, 'space3.jpg'),	
+		os.path.join(RES_FOLDER, 'space3.jpg'),
     ]
     background_images_counter = 0
     background = pygame.image.load(
