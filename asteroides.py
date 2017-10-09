@@ -99,6 +99,7 @@ def main():
     background_images = [
         os.path.join(RES_FOLDER, 'seamless_space.png'),
         os.path.join(RES_FOLDER, 'bg_big.png'),
+		os.path.join(RES_FOLDER, 'space3.jpg'),	
     ]
     background_images_counter = 0
     background = pygame.image.load(
