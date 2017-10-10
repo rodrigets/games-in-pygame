@@ -2,7 +2,7 @@
 import os
 from sys import exit
 from random import randrange
-
+import platform
 import pygame
 
 RES_FOLDER = 'resources'
@@ -91,8 +91,10 @@ def main():
     pygame.font.init()
 
     font_name = pygame.font.get_default_font()
-    game_font = pygame.font.SysFont(font_name, 72)
-
+    if platform.system().lower() == "darwin":
+        game_font = pygame.font.Font(font_name, 72)
+    else:
+        game_font = pygame.font.SysFont(font_name, 72)
     screen = pygame.display.set_mode((956, 560))
 
     # list to store multiple background images.
