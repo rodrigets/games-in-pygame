@@ -6,7 +6,9 @@ import platform
 import pygame
 
 RES_FOLDER = 'resources'
-
+SCREEN_WIDTH = 956
+SCREEN_HEIGHT = 560
+FONT_SIZE = 40
 counter = 0
 
 
@@ -92,10 +94,10 @@ def main():
 
     font_name = pygame.font.get_default_font()
     if platform.system().lower() == "darwin":
-        game_font = pygame.font.Font(font_name, 72)
+        game_font = pygame.font.Font(font_name, FONT_SIZE)
     else:
-        game_font = pygame.font.SysFont(font_name, 72)
-    screen = pygame.display.set_mode((956, 560))
+        game_font = pygame.font.SysFont(font_name, FONT_SIZE)
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
     # list to store multiple background images.
     background_images = [
@@ -138,8 +140,6 @@ def main():
     pygame.display.set_caption('Asteroides')
 
     global counter
-    t = game_font.render("Score : " + str(counter), 1, (255, 0, 0))
-    screen.blit(t, (700, 2))
 
     ticks_to_asteroid = 90
     asteroids = []
@@ -212,8 +212,12 @@ def main():
         move_shots(shots)
 
         shoot_asteroids(shots=shots, asteroids=asteroids)
-        t = game_font.render("Score : " + str(counter), True, (255, 0, 0))
-        screen.blit(t, (700, 2))
+        
+        score_text = "Score : " + str(counter)
+        score_text_size = game_font.size(score_text)
+        t = game_font.render(score_text, True, (255, 0, 0))
+        screen.blit(t, (SCREEN_WIDTH - score_text_size[0] - 5 , 5))
+
 
         for asteroid in asteroids:
             screen.blit(asteroid['surface'], asteroid['position'])
@@ -241,12 +245,15 @@ def main():
 
                 screen.blit(ship['surface'], ship['position'])
             elif collision_animation_counter == 3:
-                text = game_font.render('GAME OVER', 1, (255, 0, 0))
-                screen.blit(text, (335, 250))
+                game_over_text = 'GAME OVER'
+                game_over_text_size = game_font.size(game_over_text)
+                text = game_font.render(game_over_text, True, (255, 0, 0))
+                screen.blit(text, (SCREEN_WIDTH/2 - game_over_text_size[0]/2, 250))
 
-                playagain = game_font.render('Press R to Play Again', 13,
-                                             (255, 0, 0))
-                screen.blit(playagain, (220, 350))
+                play_again_text = 'Press R to Play Again'
+                play_again_text_size = game_font.size(play_again_text)
+                playagain = game_font.render(play_again_text, True, (255, 0, 0))
+                screen.blit(playagain, (SCREEN_WIDTH/2 - play_again_text_size[0]/2, 350))
 
                 pressed_keys = pygame.key.get_pressed()
 
