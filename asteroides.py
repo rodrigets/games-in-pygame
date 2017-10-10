@@ -185,7 +185,7 @@ def main():
         elif pressed_keys[pygame.K_RIGHT]:
             ship['speed']['x'] = 10
 
-        if pressed_keys[pygame.K_SPACE] and ticks_to_shot <= 0:
+        if pressed_keys[pygame.K_SPACE] and ticks_to_shot <= 0 and not collided:
             # play sound
             fire_sound.play()
             shots.append(create_shot(ship))
