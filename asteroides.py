@@ -263,7 +263,7 @@ def main():
         pygame.display.update()
         ticks_to_shot -= 1
 
-        if counter % 20 == 0 and counter != 0 and background_flag == 0:
+        if counter % 40 == 0 and counter != 0 and background_flag == 0:
             background_images_counter += 1
             if len(background_images):
                 aux = background_images[
@@ -272,7 +272,7 @@ def main():
                 background = pygame.image.load(aux).convert()
                 background_flag = 1
 
-        elif counter % 20 != 0:
+        elif counter % 40 != 0:
             background_flag = 0
 
         remove_used_asteroids(asteroids)
