@@ -85,6 +85,16 @@ def create_asteroid():
         'speed': randrange(3, 9)
     }
 
+#setup music to play
+#credit: Youtuber "The Music Element" - song: "Cool Space Music"
+def play_music():
+    pygame.mixer.init()
+    pygame.mixer.music.load("Cool Space Music.mp3")
+    pygame.mixer.music.play()
+
+    if (pygame.mixer.music.get_busy()==False):
+        pygame.mixer.music.load("Cool Space Music.mp3")
+        pygame.mixer.music.play()
 
 def main():
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -152,6 +162,8 @@ def main():
     collision_animation_counter = 0
 
     background_position = 0
+
+    play_music()
 
     # Clock to control FPS
     clock = pygame.time.Clock()
