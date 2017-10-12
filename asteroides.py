@@ -50,7 +50,9 @@ def shoot_asteroids(shots, asteroids):
                 global counter
                 counter += 5
 
-def rot_center(image, angle):
+
+# https://pygame.org/wiki/RotateCenter
+def rotate_center(image, angle):
     """rotate an image while keeping its center and size"""
     orig_rect = image.get_rect()
     rot_image = pygame.transform.rotate(image, angle)
@@ -60,9 +62,15 @@ def rot_center(image, angle):
     return rot_image
 
 
+# Rotate asteroid with angular velocity and limiting it to 360 degrees.
+def rotate_asteroid(asteroid):
+    asteroid['angle'] = (asteroid['angle'] + asteroid['angular_velocity']) % 360
+
+
 def move_asteroids(asteroids):
     for asteroid in asteroids:
         asteroid['position'][1] += asteroid['speed']
+        rotate_asteroid(asteroid)
 
 
 def remove_used_asteroids(asteroids):
@@ -91,7 +99,9 @@ def create_asteroid():
         'surface': pygame.image.load(
             os.path.join(RES_FOLDER, 'asteroid.png')).convert_alpha(),
         'position': [randrange(892), -64],
-        'speed': randrange(3, 9)
+        'speed': randrange(3, 9),
+        'angle': 0,
+        'angular_velocity': randrange(1, 10)
     }
 
 #setup music to play
@@ -272,10 +282,8 @@ def main():
         screen.blit(t, (SCREEN_WIDTH - score_text_size[0] - 5 , 5))
 
 
-        # increase angle to rotate asteroid
-        angle += 2
         for asteroid in asteroids:
-            screen.blit(rot_center(asteroid['surface'], angle % 360), asteroid['position'])
+            screen.blit(rotate_center(asteroid['surface'], asteroid['angle']), asteroid['position'])
 
         for shot in shots:
             screen.blit(shot['surface'], shot['position'])
