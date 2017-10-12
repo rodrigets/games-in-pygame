@@ -96,6 +96,36 @@ def play_music():
         pygame.mixer.music.load("Cool Space Music.mp3")
         pygame.mixer.music.play()
 
+def start_screen():
+    pygame.init()
+    clock = pygame.time.Clock()
+    screen = pygame.display.set_mode((956, 560))
+    pygame.draw.line(screen,(150,150,150),[330,240],[640,240], 5)
+    pygame.draw.line(screen,(150,150,150),[330,238],[330,305], 5)
+    pygame.draw.line(screen,(50,50,50),[330,305],[640,305], 5)
+    pygame.draw.line(screen,(50,50,50),[640,305],[640,240], 5)
+    pygame.draw.rect(screen,(100,100,100),(330,240,310,65))
+    font_name = pygame.font.get_default_font()
+    start_screen_font = pygame.font.SysFont(font_name, 72)
+    t = start_screen_font.render("Start Game", 1, (255, 0, 0))
+    start_button = screen.blit(t, (350, 250))
+
+    show_start_screen = True
+
+    while show_start_screen:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit()
+
+        pressed_keys = pygame.key.get_pressed()
+
+        if event.type == pygame.MOUSEBUTTONDOWN and start_button.collidepoint(pygame.mouse.get_pos()):
+            show_start_screen = False
+            main()
+
+        pygame.display.update()
+        clock.tick(60)
+
 def main():
     pygame.mixer.pre_init(44100, -16, 2, 4096)
     pygame.init()
@@ -303,4 +333,4 @@ def main():
         clock.tick(60)
 
 
-main()
+start_screen()
