@@ -50,6 +50,15 @@ def shoot_asteroids(shots, asteroids):
                 global counter
                 counter += 5
 
+def rot_center(image, angle):
+    """rotate an image while keeping its center and size"""
+    orig_rect = image.get_rect()
+    rot_image = pygame.transform.rotate(image, angle)
+    rot_rect = orig_rect.copy()
+    rot_rect.center = rot_image.get_rect().center
+    rot_image = rot_image.subsurface(rot_rect).copy()
+    return rot_image
+
 
 def move_asteroids(asteroids):
     for asteroid in asteroids:
@@ -163,6 +172,8 @@ def main():
 
     background_position = 0
 
+    angle = 0
+
     play_music()
 
     # Clock to control FPS
@@ -231,8 +242,10 @@ def main():
         screen.blit(t, (SCREEN_WIDTH - score_text_size[0] - 5 , 5))
 
 
+        # increase angle to rotate asteroid
+        angle += 2
         for asteroid in asteroids:
-            screen.blit(asteroid['surface'], asteroid['position'])
+            screen.blit(rot_center(asteroid['surface'], angle % 360), asteroid['position'])
 
         for shot in shots:
             screen.blit(shot['surface'], shot['position'])
