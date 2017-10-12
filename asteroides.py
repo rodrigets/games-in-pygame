@@ -89,11 +89,11 @@ def create_asteroid():
 #credit: Youtuber "The Music Element" - song: "Cool Space Music"
 def play_music():
     pygame.mixer.init()
-    pygame.mixer.music.load("Cool Space Music.mp3")
+    pygame.mixer.music.load(os.path.join(RES_FOLDER, "Cool Space Music.mp3"))
     pygame.mixer.music.play()
 
     if (pygame.mixer.music.get_busy()==False):
-        pygame.mixer.music.load("Cool Space Music.mp3")
+        pygame.mixer.music.load(os.path.join(RES_FOLDER, "Cool Space Music.mp3"))
         pygame.mixer.music.play()
 
 def main():
