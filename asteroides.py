@@ -200,6 +200,7 @@ def main():
 
     global counter
 
+    asteroids_intensity = 0
     ticks_to_asteroid = 90
     asteroids = []
 
@@ -222,7 +223,12 @@ def main():
     while True:
 
         if not ticks_to_asteroid:
-            ticks_to_asteroid = 90
+
+            if (counter != 0) and ((counter % 40) == 0) and (counter <= 160):
+                asteroids_intensity = (counter/40*15)
+
+            ticks_to_asteroid = 90 - asteroids_intensity
+
             asteroids.append(create_asteroid())
         else:
             ticks_to_asteroid -= 1
