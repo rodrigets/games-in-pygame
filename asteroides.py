@@ -352,7 +352,7 @@ def main(is_two_player):
             text = game_font.render(game_over_text, True, (255, 0, 0))
             screen.blit(text, (SCREEN_WIDTH/2 - game_over_text_size[0]/2, 250))
 
-            play_again_text = 'Press R to Play Again'
+            play_again_text = 'Press R to restart or Esc for the main menu'
             play_again_text_size = game_font.size(play_again_text)
             playagain = game_font.render(play_again_text, True, (255, 0, 0))
             screen.blit(playagain, (SCREEN_WIDTH/2 - play_again_text_size[0]/2, 350))
@@ -363,6 +363,12 @@ def main(is_two_player):
                 counter = 0
                 counter2 = 0
                 main(is_two_player)
+
+            if pressed_keys[pygame.K_ESCAPE]:
+                counter = 0
+                counter2 = 0
+                start_screen()
+
         else:
             for ship, exploded_ship in zip(ships, exploded_ships):
                 if not ship['collided']:
@@ -396,7 +402,7 @@ def main(is_two_player):
                         ship['collision_animation_counter'] += 1
 
         pygame.display.update()
-        
+
         for ship in ships:
             ship['ticks_to_shot'] -= 1
 
