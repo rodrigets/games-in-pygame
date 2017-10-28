@@ -11,6 +11,35 @@ SCREEN_HEIGHT = 560
 FONT_SIZE = 40
 counter = 0
 
+def create_ship():
+    ship = {
+        'surface': pygame.image.load(
+            os.path.join(RES_FOLDER, 'ship.png')).convert_alpha(),
+        'position': [randrange(-10, 918), randrange(-10, 520)],
+        'speed': {
+            'x': 0,
+            'y': 0
+        },
+        'ticks_to_shot': 15,
+        'collided': False,
+        'collision_animation_counter': 0,
+        'explosion_played': False,
+        'dead': False
+    }
+    return ship
+
+def create_exploded_ship():
+    exploded_ship = {
+        'surface': pygame.image.load(
+            os.path.join(RES_FOLDER, 'ship_exploded.png')).convert_alpha(),
+        'position': [],
+        'speed': {
+            'x': 0,
+            'y': 0
+        },
+        'rect': pygame.Rect(0, 0, 48, 48)
+    }
+    return exploded_ship
 
 def create_shot(spaceship):
     # load image of bullet
@@ -115,19 +144,28 @@ def play_music():
         pygame.mixer.music.load(os.path.join(RES_FOLDER, "Cool Space Music.mp3"))
         pygame.mixer.music.play()
 
+def draw_button(screen, left, top, text):
+    BUTTON_WIDTH = 310
+    BUTTON_HEIGHT = 65
+
+    pygame.draw.line(screen,(150,150,150),[left,top],[left+BUTTON_WIDTH,top], 5)
+    pygame.draw.line(screen,(150,150,150),[left,top-2],[left,top+BUTTON_HEIGHT], 5)
+    pygame.draw.line(screen,(50,50,50),[left,top+BUTTON_HEIGHT],[left+BUTTON_WIDTH,top+BUTTON_HEIGHT], 5)
+    pygame.draw.line(screen,(50,50,50),[left+BUTTON_WIDTH,top+BUTTON_HEIGHT],[left+BUTTON_WIDTH,top], 5)
+    pygame.draw.rect(screen,(100,100,100),(left,top,BUTTON_WIDTH,BUTTON_HEIGHT))
+
+    font_name = pygame.font.get_default_font()
+    start_screen_font = pygame.font.SysFont(font_name, 72)
+    t = start_screen_font.render(text, 1, (255, 0, 0))
+    return screen.blit(t, (left+20, top+10))
+
 def start_screen():
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((956, 560))
-    pygame.draw.line(screen,(150,150,150),[330,240],[640,240], 5)
-    pygame.draw.line(screen,(150,150,150),[330,238],[330,305], 5)
-    pygame.draw.line(screen,(50,50,50),[330,305],[640,305], 5)
-    pygame.draw.line(screen,(50,50,50),[640,305],[640,240], 5)
-    pygame.draw.rect(screen,(100,100,100),(330,240,310,65))
-    font_name = pygame.font.get_default_font()
-    start_screen_font = pygame.font.SysFont(font_name, 72)
-    t = start_screen_font.render("Start Game", 1, (255, 0, 0))
-    start_button = screen.blit(t, (350, 250))
+
+    one_player_button = draw_button(screen, 330, 190, "One Player")
+    two_player_button = draw_button(screen, 330, 305, "Two Player")
 
     show_start_screen = True
 
@@ -138,14 +176,18 @@ def start_screen():
 
         pressed_keys = pygame.key.get_pressed()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and start_button.collidepoint(pygame.mouse.get_pos()):
+        if event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(pygame.mouse.get_pos()):
             show_start_screen = False
-            main()
+            main(is_two_player=False)
+
+        if event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(pygame.mouse.get_pos()):
+            show_start_screen = False
+            main(is_two_player=True)
 
         pygame.display.update()
         clock.tick(60)
 
-def main():
+def main(is_two_player):
     pygame.mixer.pre_init(44100, -16, 2, 4096)
     pygame.init()
 
@@ -169,30 +211,17 @@ def main():
         background_images[background_images_counter]).convert()
     background_flag = 0
 
-    ship = {
-        'surface': pygame.image.load(
-            os.path.join(RES_FOLDER, 'ship.png')).convert_alpha(),
-        'position': [randrange(-10, 918), randrange(-10, 520)],
-        'speed': {
-            'x': 0,
-            'y': 0
-        }
-    }
+    ships = [create_ship()]
+    exploded_ships = [create_exploded_ship()]
 
-    exploded_ship = {
-        'surface': pygame.image.load(
-            os.path.join(RES_FOLDER, 'ship_exploded.png')).convert_alpha(),
-        'position': [],
-        'speed': {
-            'x': 0,
-            'y': 0
-        },
-        'rect': pygame.Rect(0, 0, 48, 48)
-    }
+    if is_two_player:
+        ships.append(create_ship())
+        exploded_ships.append(create_exploded_ship())
+
+    death_ct = 0
 
     # sounds
     explosion_sound = pygame.mixer.Sound(os.path.join(RES_FOLDER, 'boom.wav'))
-    explosion_played = False
 
     fire_sound = pygame.mixer.Sound(os.path.join(RES_FOLDER, 'shot.ogg'))
 
@@ -204,12 +233,7 @@ def main():
     ticks_to_asteroid = 90
     asteroids = []
 
-    # counter to prevent permanent fire
-    ticks_to_shot = 15
     shots = []
-
-    collided = False
-    collision_animation_counter = 0
 
     background_position = 0
 
@@ -223,20 +247,19 @@ def main():
     while True:
 
         if not ticks_to_asteroid:
-
             if (counter != 0) and ((counter % 40) == 0) and (counter <= 160):
                 asteroids_intensity = (counter/40*15)
-
             ticks_to_asteroid = 90 - asteroids_intensity
 
             asteroids.append(create_asteroid())
         else:
             ticks_to_asteroid -= 1
 
-        ship['speed'] = {
-            'x': 0,
-            'y': 0
-        }
+        for ship in ships:
+            ship['speed'] = {
+                'x': 0,
+                'y': 0
+            }
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -244,24 +267,38 @@ def main():
 
         pressed_keys = pygame.key.get_pressed()
 
+        # First player
         if pressed_keys[pygame.K_UP]:
-            ship['speed']['y'] = -5
-
+            ships[0]['speed']['y'] = -5
         elif pressed_keys[pygame.K_DOWN]:
-            ship['speed']['y'] = 5
-
+            ships[0]['speed']['y'] = 5
         if pressed_keys[pygame.K_LEFT]:
-            ship['speed']['x'] = -10
-
+            ships[0]['speed']['x'] = -10
         elif pressed_keys[pygame.K_RIGHT]:
-            ship['speed']['x'] = 10
-
-        if pressed_keys[pygame.K_SPACE] and ticks_to_shot <= 0 and not collided:
+            ships[0]['speed']['x'] = 10
+        if pressed_keys[pygame.K_SPACE] and ships[0]['ticks_to_shot'] <= 0 and not ships[0]['collided']:
             # play sound
             fire_sound.play()
-            shots.append(create_shot(ship))
+            shots.append(create_shot(ships[0]))
             # set timer for next possible shot
-            ticks_to_shot = 15
+            ships[0]['ticks_to_shot'] = 15
+
+        # Second player
+        if is_two_player:
+            if pressed_keys[pygame.K_w]:
+                ships[1]['speed']['y'] = -5
+            elif pressed_keys[pygame.K_s]:
+                ships[1]['speed']['y'] = 5
+            if pressed_keys[pygame.K_a]:
+                ships[1]['speed']['x'] = -10
+            elif pressed_keys[pygame.K_d]:
+                ships[1]['speed']['x'] = 10
+            if pressed_keys[pygame.K_x] and ships[1]['ticks_to_shot'] <= 0 and not ships[1]['collided']:
+                # play sound
+                fire_sound.play()
+                shots.append(create_shot(ships[1]))
+                # set timer for next possible shot
+                ships[1]['ticks_to_shot'] = 15
 
         # moving the background to simulate space travel
         # blint background relative to position of prior iteration
@@ -287,59 +324,64 @@ def main():
         t = game_font.render(score_text, True, (255, 0, 0))
         screen.blit(t, (SCREEN_WIDTH - score_text_size[0] - 5 , 5))
 
-
         for asteroid in asteroids:
             screen.blit(rotate_center(asteroid['surface'], asteroid['angle']), asteroid['position'])
 
         for shot in shots:
             screen.blit(shot['surface'], shot['position'])
 
-        if not collided:
-            collided = ship_collided(ship=ship, asteroids=asteroids)
-            if ((ship['position'][0] + ship['speed']['x']) > -10) and (
-                        (ship['position'][0] + ship['speed']['x']) < 918):
-                ship['position'][0] += ship['speed']['x']
+        if death_ct == len(ships):
+            game_over_text = 'GAME OVER'
+            game_over_text_size = game_font.size(game_over_text)
+            text = game_font.render(game_over_text, True, (255, 0, 0))
+            screen.blit(text, (SCREEN_WIDTH/2 - game_over_text_size[0]/2, 250))
 
-            if (ship['position'][1] + ship['speed']['y'] > -10) and (
-                            ship['position'][1] + ship['speed']['y'] < 520):
-                ship['position'][1] += ship['speed']['y']
+            play_again_text = 'Press R to Play Again'
+            play_again_text_size = game_font.size(play_again_text)
+            playagain = game_font.render(play_again_text, True, (255, 0, 0))
+            screen.blit(playagain, (SCREEN_WIDTH/2 - play_again_text_size[0]/2, 350))
 
-            screen.blit(ship['surface'], ship['position'])
+            pressed_keys = pygame.key.get_pressed()
+
+            if pressed_keys[pygame.K_r]:
+                counter = 0
+                main(is_two_player)
         else:
-            if not explosion_played:
-                explosion_played = True
-                explosion_sound.play()
-                ship['position'][0] += ship['speed']['x']
-                ship['position'][1] += ship['speed']['y']
+            for ship, exploded_ship in zip(ships, exploded_ships):
+                if not ship['collided']:
+                    ship['collided'] = ship_collided(ship=ship, asteroids=asteroids)
+                    if ((ship['position'][0] + ship['speed']['x']) > -10) and (
+                                (ship['position'][0] + ship['speed']['x']) < 918):
+                        ship['position'][0] += ship['speed']['x']
 
-                screen.blit(ship['surface'], ship['position'])
-            elif collision_animation_counter == 3:
-                game_over_text = 'GAME OVER'
-                game_over_text_size = game_font.size(game_over_text)
-                text = game_font.render(game_over_text, True, (255, 0, 0))
-                screen.blit(text, (SCREEN_WIDTH/2 - game_over_text_size[0]/2, 250))
+                    if (ship['position'][1] + ship['speed']['y'] > -10) and (
+                                    ship['position'][1] + ship['speed']['y'] < 520):
+                        ship['position'][1] += ship['speed']['y']
 
-                play_again_text = 'Press R to Play Again'
-                play_again_text_size = game_font.size(play_again_text)
-                playagain = game_font.render(play_again_text, True, (255, 0, 0))
-                screen.blit(playagain, (SCREEN_WIDTH/2 - play_again_text_size[0]/2, 350))
+                    screen.blit(ship['surface'], ship['position'])
+                elif not ship['dead']:
+                    if not ship['explosion_played']:
+                        ship['explosion_played'] = True
+                        explosion_sound.play()
+                        ship['position'][0] += ship['speed']['x']
+                        ship['position'][1] += ship['speed']['y']
 
-                pressed_keys = pygame.key.get_pressed()
-
-                if pressed_keys[pygame.K_r]:
-                    counter = 0
-                    main()
-
-            else:
-                exploded_ship['rect'].x = collision_animation_counter * 48
-                exploded_ship['position'] = ship['position']
-                screen.blit(exploded_ship['surface'],
-                            exploded_ship['position'],
-                            exploded_ship['rect'])
-                collision_animation_counter += 1
+                        screen.blit(ship['surface'], ship['position'])
+                    elif ship['collision_animation_counter'] == 3:
+                        death_ct += 1
+                        ship['dead'] = True
+                    else:
+                        exploded_ship['rect'].x = ship['collision_animation_counter'] * 48
+                        exploded_ship['position'] = ship['position']
+                        screen.blit(exploded_ship['surface'],
+                                    exploded_ship['position'],
+                                    exploded_ship['rect'])
+                        ship['collision_animation_counter'] += 1
 
         pygame.display.update()
-        ticks_to_shot -= 1
+        
+        for ship in ships:
+            ship['ticks_to_shot'] -= 1
 
         if counter % 40 == 0 and counter != 0 and background_flag == 0:
             background_images_counter += 1
