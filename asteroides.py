@@ -115,32 +115,78 @@ def play_music():
         pygame.mixer.music.load(os.path.join(RES_FOLDER, "Cool Space Music.mp3"))
         pygame.mixer.music.play()
 
+
+def make_menu_button(text, width, height, text_color=(255, 0, 0), back_color=(100, 100, 100)):
+    surface = pygame.Surface((width, height))
+    surface.fill(back_color)
+    pygame.draw.line(surface, (150, 150, 150), (0, 0), (width, 0))
+    pygame.draw.line(surface, (150, 150, 150), (0, 0), (0, height))
+    pygame.draw.line(surface, (50, 50, 50), (0, height-1), (width-1, height-1))
+    pygame.draw.line(surface, (50, 50, 50), (width-1, 0), (width-1, height-1))
+    font_name = pygame.font.get_default_font()
+    font = pygame.font.SysFont(font_name, 72)
+    text = font.render(text, 1, text_color)
+    surface.blit(text, (width//2 - text.get_width()//2, height//2 - text.get_height()//2))
+    return surface
+
 def start_screen():
+    START_GAME = "Start Game"
+    QUIT_GAME = "Quit Game"
+
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((956, 560))
-    pygame.draw.line(screen,(150,150,150),[330,240],[640,240], 5)
-    pygame.draw.line(screen,(150,150,150),[330,238],[330,305], 5)
-    pygame.draw.line(screen,(50,50,50),[330,305],[640,305], 5)
-    pygame.draw.line(screen,(50,50,50),[640,305],[640,240], 5)
-    pygame.draw.rect(screen,(100,100,100),(330,240,310,65))
-    font_name = pygame.font.get_default_font()
-    start_screen_font = pygame.font.SysFont(font_name, 72)
-    t = start_screen_font.render("Start Game", 1, (255, 0, 0))
-    start_button = screen.blit(t, (350, 250))
+    menu_items = [START_GAME, QUIT_GAME]
+    button_height = 75
+    button_width = 360
+    button_spacing = 15
+    selection = 0
 
     show_start_screen = True
 
     while show_start_screen:
+        buttons = []
+        for i in range(len(menu_items)):
+            text_color = (255, 80, 80) if i == selection else (192, 80, 80)
+            back_color = (100, 100, 100) if i == selection else (80, 80, 80)
+            text = menu_items[i]
+            button_surface = make_menu_button(text, button_width, button_height - button_spacing, text_color, back_color)
+
+            left = screen.get_width() // 2 - button_width // 2
+            top = screen.get_height() // 2 - button_height * len(menu_items) // 2 + button_height * i
+            button = screen.blit(button_surface, (left, top))
+            buttons.append(button)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
 
         pressed_keys = pygame.key.get_pressed()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and start_button.collidepoint(pygame.mouse.get_pos()):
+        activated = None
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for i in range(len(menu_items)):
+                if buttons[i].collidepoint(pygame.mouse.get_pos()):
+                    if selection == i:
+                        activated = i
+                    else:
+                        selection = i
+
+        if pressed_keys[pygame.K_UP] and selection > 0:
+                selection -= 1
+        elif pressed_keys[pygame.K_DOWN] and selection < len(menu_items)-1:
+                selection += 1
+        elif pressed_keys[pygame.K_RETURN]:
+            activated = selection
+        elif pressed_keys[pygame.K_q]:
             show_start_screen = False
-            main()
+
+        if activated is not None:
+            if menu_items[activated] == START_GAME:
+                show_start_screen = False
+                main()
+            if menu_items[activated] == QUIT_GAME:
+                show_start_screen = False
 
         pygame.display.update()
         clock.tick(60)
