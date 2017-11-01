@@ -10,6 +10,7 @@ SCREEN_WIDTH = 956
 SCREEN_HEIGHT = 560
 FONT_SIZE = 40
 counter = 0
+counter2 =0
 
 def create_ship():
     ship = {
@@ -24,7 +25,8 @@ def create_ship():
         'collided': False,
         'collision_animation_counter': 0,
         'explosion_played': False,
-        'dead': False
+        'dead': False,
+        'player': ''
     }
     return ship
 
@@ -47,13 +49,14 @@ def create_shot(spaceship):
     # scale it to smaller size
     surf = pygame.transform.scale(surf, (10, 10))
     ship_rect = get_rect(spaceship)
-
+    player = spaceship['player']
     return {
         'surface': surf.convert_alpha(),
         # create shot on tip of the ship
         'position': [(ship_rect[0] + 0.5 * ship_rect[2]) - 5,
                      ship_rect[1]],
         'speed': 8,
+        'player': player,
     }
 
 
@@ -76,8 +79,12 @@ def shoot_asteroids(shots, asteroids):
             if shot_rect.colliderect(get_rect(asteroid)):
                 shots.remove(shot)
                 asteroids.remove(asteroid)
-                global counter
-                counter += 5
+                if shot['player'] == '1':
+                    global counter
+                    counter += 5
+                if shot['player'] == '2':
+                    global counter2
+                    counter2 += 5
 
 
 # https://pygame.org/wiki/RotateCenter
@@ -212,10 +219,12 @@ def main(is_two_player):
     background_flag = 0
 
     ships = [create_ship()]
+    ships[0]['player'] = '1'
     exploded_ships = [create_exploded_ship()]
 
     if is_two_player:
         ships.append(create_ship())
+        ships[1]['player'] = '2'
         exploded_ships.append(create_exploded_ship())
 
     death_ct = 0
@@ -228,6 +237,7 @@ def main(is_two_player):
     pygame.display.set_caption('Asteroides')
 
     global counter
+    global counter2
 
     asteroids_intensity = 0
     ticks_to_asteroid = 90
@@ -318,11 +328,17 @@ def main(is_two_player):
         move_shots(shots)
 
         shoot_asteroids(shots=shots, asteroids=asteroids)
-        
-        score_text = "Score : " + str(counter)
+
+        score_text = "Score Player 1: " + str(counter)
         score_text_size = game_font.size(score_text)
-        t = game_font.render(score_text, True, (255, 0, 0))
-        screen.blit(t, (SCREEN_WIDTH - score_text_size[0] - 5 , 5))
+        t = game_font.render(score_text, True, (0, 0, 255))
+        screen.blit(t, (0, 5))
+
+        if is_two_player:
+            score_text2 = "Score Player 2: " + str(counter2)
+            score_text_size2 = game_font.size(score_text2)
+            t2 = game_font.render(score_text2, True, (255, 0, 0))
+            screen.blit(t2, (SCREEN_WIDTH - score_text_size[0] - 16, 5))
 
         for asteroid in asteroids:
             screen.blit(rotate_center(asteroid['surface'], asteroid['angle']), asteroid['position'])
@@ -345,6 +361,7 @@ def main(is_two_player):
 
             if pressed_keys[pygame.K_r]:
                 counter = 0
+                counter2 = 0
                 main(is_two_player)
         else:
             for ship, exploded_ship in zip(ships, exploded_ships):
