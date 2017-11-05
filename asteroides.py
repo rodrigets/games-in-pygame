@@ -166,28 +166,33 @@ def draw_button(screen, left, top, text):
     t = start_screen_font.render(text, 1, (255, 0, 0))
     return screen.blit(t, (left+20, top+10))
 
+
 def start_screen():
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((956, 560))
 
-    one_player_button = draw_button(screen, 330, 190, "One Player")
-    two_player_button = draw_button(screen, 330, 305, "Two Player")
-
     show_start_screen = True
 
     while show_start_screen:
+        one_player_button = draw_button(screen, 330, 190, "One Player")
+        two_player_button = draw_button(screen, 330, 305, "Two Player")
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
 
-        pressed_keys = pygame.key.get_pressed()
+            pressed_keys = pygame.key.get_pressed()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(pygame.mouse.get_pos()):
-            show_start_screen = main(is_two_player=False)
+            singleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(pygame.mouse.get_pos())
+            doubleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(pygame.mouse.get_pos())
 
-        if event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(pygame.mouse.get_pos()):
-            show_start_screen = main(is_two_player=True)
+            if singleplayer_selected:
+                show_start_screen = main(is_two_player=False)
+                screen.fill((0, 0, 0))
+            elif doubleplayer_selected:
+                show_start_screen = main(is_two_player=True)
+                screen.fill((0,0,0))
 
         pygame.display.update()
         clock.tick(60)
@@ -236,6 +241,9 @@ def main(is_two_player):
 
     global counter
     global counter2
+
+    counter = 0
+    counter2 = 0
 
     asteroids_intensity = 0
     ticks_to_asteroid = 90
@@ -358,9 +366,7 @@ def main(is_two_player):
             pressed_keys = pygame.key.get_pressed()
 
             if pressed_keys[pygame.K_r]:
-                counter = 0
-                counter2 = 0
-                main(is_two_player)
+                return main(is_two_player)
 
             if pressed_keys[pygame.K_ESCAPE]:
                 return True
