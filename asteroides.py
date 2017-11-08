@@ -166,30 +166,33 @@ def draw_button(screen, left, top, text):
     t = start_screen_font.render(text, 1, (255, 0, 0))
     return screen.blit(t, (left+20, top+10))
 
+
 def start_screen():
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((956, 560))
 
-    one_player_button = draw_button(screen, 330, 190, "One Player")
-    two_player_button = draw_button(screen, 330, 305, "Two Player")
-
     show_start_screen = True
 
     while show_start_screen:
+        one_player_button = draw_button(screen, 330, 190, "One Player")
+        two_player_button = draw_button(screen, 330, 305, "Two Player")
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit()
 
-        pressed_keys = pygame.key.get_pressed()
+            pressed_keys = pygame.key.get_pressed()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(pygame.mouse.get_pos()):
-            show_start_screen = False
-            main(is_two_player=False)
+            singleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(pygame.mouse.get_pos())
+            doubleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(pygame.mouse.get_pos())
 
-        if event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(pygame.mouse.get_pos()):
-            show_start_screen = False
-            main(is_two_player=True)
+            if singleplayer_selected:
+                show_start_screen = main(is_two_player=False)
+                screen.fill((0, 0, 0))
+            elif doubleplayer_selected:
+                show_start_screen = main(is_two_player=True)
+                screen.fill((0,0,0))
 
         pygame.display.update()
         clock.tick(60)
@@ -238,6 +241,9 @@ def main(is_two_player):
 
     global counter
     global counter2
+
+    counter = 0
+    counter2 = 0
 
     asteroids_intensity = 0
     ticks_to_asteroid = 90
@@ -352,7 +358,7 @@ def main(is_two_player):
             text = game_font.render(game_over_text, True, (255, 0, 0))
             screen.blit(text, (SCREEN_WIDTH/2 - game_over_text_size[0]/2, 250))
 
-            play_again_text = 'Press R to Play Again'
+            play_again_text = 'Press R to restart, Esc for the main menu, or Q to quit'
             play_again_text_size = game_font.size(play_again_text)
             playagain = game_font.render(play_again_text, True, (255, 0, 0))
             screen.blit(playagain, (SCREEN_WIDTH/2 - play_again_text_size[0]/2, 350))
@@ -360,9 +366,14 @@ def main(is_two_player):
             pressed_keys = pygame.key.get_pressed()
 
             if pressed_keys[pygame.K_r]:
-                counter = 0
-                counter2 = 0
-                main(is_two_player)
+                return main(is_two_player)
+
+            if pressed_keys[pygame.K_ESCAPE]:
+                return True
+
+            if pressed_keys[pygame.K_q]:
+                return False
+
         else:
             for ship, exploded_ship in zip(ships, exploded_ships):
                 if not ship['collided']:
@@ -396,7 +407,7 @@ def main(is_two_player):
                         ship['collision_animation_counter'] += 1
 
         pygame.display.update()
-        
+
         for ship in ships:
             ship['ticks_to_shot'] -= 1
 
