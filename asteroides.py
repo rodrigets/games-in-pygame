@@ -2,8 +2,12 @@
 import os
 from sys import exit
 from random import randrange
+import random
 import platform
 import pygame
+import math
+import operator
+from math import sin, cos, pi, atan2
 
 RES_FOLDER = 'resources'
 SCREEN_WIDTH = 956
@@ -59,11 +63,102 @@ def create_shot(spaceship):
         'player': player,
     }
 
+def create_alien_ship(ships):
+
+    # choose one of the ships as target for fire
+    fire_target = random.choice(ships)
+ 
+    # load image of ship
+    surf = pygame.image.load(os.path.join(RES_FOLDER, 'aliens.png'))
+    
+    # scale it to smaller size and make it quadratic
+    surf = pygame.transform.scale(surf, (70, 70))
+    return {
+        'surface': surf.convert_alpha(),
+        'position': [randrange(892), -64],
+        'speed': 4,
+        'fire_target': fire_target,
+        'angle': 0,
+        'ticks_to_laser': 25
+    }
+
+def get_alien_ship_rotation_angle(alien_ship):
+
+    # get center of alien ship
+    alien_center = tuple(map(sum, zip(alien_ship['surface'].get_rect().center, tuple(alien_ship['position']))))
+
+    # get center of target ship
+    target_center = tuple(map(sum, zip(alien_ship['fire_target']['surface'].get_rect().center, tuple(alien_ship['fire_target']['position']))))
+    
+    # calculate angle between alien ship and target center
+    radiant_angle = math.atan2(target_center[0] - alien_center[0], target_center[1]- alien_center[1])
+
+    # convert to degrees
+    degree_angle =  math.degrees(radiant_angle)
+    
+    # update angle on alien ship information
+    alien_ship['angle'] = degree_angle
+
+    return(degree_angle)
+
+
+def alien_shoot_laser(alien_ship):
+
+    # find current position of ship center
+    alien_center = list(map(sum, zip(alien_ship['surface'].get_rect().center, tuple(alien_ship['position']))))
+    
+    # find position of the target center
+    target_center = list(map(sum, zip(alien_ship['fire_target']['surface'].get_rect().center, tuple(alien_ship['fire_target']['position']))))
+
+    # calculate angle to target
+    x_dist =  - alien_center[0] + target_center[0]
+    y_dist =  - alien_center[1] + target_center[1]
+    angle_to_target = (atan2(-y_dist, x_dist) % (2 * pi))
+
+    # load image of alien bullet
+    surf = pygame.image.load(os.path.join(RES_FOLDER, 'alien_bullet.png'))
+    
+    # scale it
+    surf = pygame.transform.scale(surf, (10, 10))
+
+    return {
+        'surface': surf.convert_alpha(),
+        'position': alien_center,
+        'angle' : angle_to_target,
+        'speed': 7
+    }
+
+def move_alien_shots(alien_shots):
+
+    for alien_shot in alien_shots:
+        
+        alien_shot['position'][0] += cos(alien_shot['angle']) * alien_shot['speed']
+        alien_shot['position'][1] -= sin(alien_shot['angle']) * alien_shot['speed']
+
+
+def remove_alien_shots(alien_shots):
+    for alien_shot in alien_shots:
+        out_of_bounds = alien_shot['position'][1] > 560
+        out_of_bounds = out_of_bounds or alien_shot['position'][1] < 0 
+        out_of_bounds = out_of_bounds or alien_shot['position'][0] < 0
+        out_of_bounds = out_of_bounds or alien_shot['position'][0] > 956
+        if out_of_bounds:
+            alien_shots.remove(alien_shot)
+
+
+def move_alien_ships(alien_ships):
+    for alien_ship in alien_ships:
+        alien_ship['position'][1] += alien_ship['speed']
+
+def remove_alien_ships(alien_ships):
+    for alien_ship in alien_ships:
+        if alien_ship['position'][1] > 560:
+            alien_ships.remove[alien_ship]
+
 
 def move_shots(shots):
     for shot in shots:
         shot['position'][1] -= shot['speed']
-
 
 def remove_missed_shots(shots):
     # remove shots from game that leave screen
@@ -85,6 +180,21 @@ def shoot_asteroids(shots, asteroids):
                 if shot['player'] == '2':
                     global counter2
                     counter2 += 5
+
+
+def shoot_alien_ships(shots, alien_ships):
+    for shot in shots:
+        shot_rect = get_rect(shot)
+        for alien_ship in alien_ships:
+            if shot_rect.colliderect(get_rect(alien_ship)):
+                shots.remove(shot)
+                alien_ships.remove(alien_ship)
+                if shot['player'] == '1':
+                    global counter
+                    counter += 10
+                if shot['player'] == '2':
+                    global counter2
+                    counter2 += 10
 
 
 # https://pygame.org/wiki/RotateCenter
@@ -122,10 +232,16 @@ def get_rect(obj):
                        obj['surface'].get_height())
 
 
-def ship_collided(ship, asteroids):
+def ship_collided(ship, asteroids, alien_ships, alien_shots):
     ship_rect = get_rect(ship)
     for asteroid in asteroids:
         if ship_rect.colliderect(get_rect(asteroid)):
+            return True
+    for alien_ship in alien_ships:
+        if ship_rect.colliderect(get_rect(alien_ship)):
+            return True
+    for alien_shot in alien_shots:
+        if ship_rect.colliderect(get_rect(alien_shot)):
             return True
     return False
 
@@ -247,9 +363,14 @@ def main(is_two_player):
 
     asteroids_intensity = 0
     ticks_to_asteroid = 90
-    asteroids = []
 
+    alien_ships_intensity = 0
+    ticks_to_alien_ship = 200
+
+    alien_ships = []
+    asteroids = []
     shots = []
+    alien_shots = []
 
     background_position = 0
 
@@ -268,8 +389,29 @@ def main(is_two_player):
             ticks_to_asteroid = 90 - asteroids_intensity
 
             asteroids.append(create_asteroid())
+            
         else:
             ticks_to_asteroid -= 1
+        
+        if not ticks_to_alien_ship:
+            if (counter != 0) and ((counter % 50) == 0) and (counter <= 200):
+                alien_ships_intensity = (counter/50*15)
+            ticks_to_alien_ship = 200 - alien_ships_intensity
+
+            alien_ships.append(create_alien_ship(ships))
+        else:
+            ticks_to_alien_ship -= 1
+
+        # shooting of alien ships
+        for alien_ship in alien_ships:
+
+            # check if ship can shoot again
+            if alien_ship['ticks_to_laser'] > 0:
+                alien_ship['ticks_to_laser'] -= 1
+            else:
+                alien_shots.append(alien_shoot_laser(alien_ship))
+                alien_ship['ticks_to_laser'] = 25
+
 
         for ship in ships:
             ship['speed'] = {
@@ -332,8 +474,12 @@ def main(is_two_player):
 
         move_asteroids(asteroids)
         move_shots(shots)
+        move_alien_ships(alien_ships)
+        move_alien_shots(alien_shots)
 
         shoot_asteroids(shots=shots, asteroids=asteroids)
+        shoot_alien_ships(shots, alien_ships)
+
 
         score_text = "Score Player 1: " + str(counter)
         score_text_size = game_font.size(score_text)
@@ -348,9 +494,15 @@ def main(is_two_player):
 
         for asteroid in asteroids:
             screen.blit(rotate_center(asteroid['surface'], asteroid['angle']), asteroid['position'])
+        
+        for alien_ship in alien_ships:
+            screen.blit(rotate_center(alien_ship['surface'], get_alien_ship_rotation_angle(alien_ship)), alien_ship['position'])
 
         for shot in shots:
             screen.blit(shot['surface'], shot['position'])
+
+        for alien_shot in alien_shots:
+            screen.blit(alien_shot['surface'], alien_shot['position'])
 
         if death_ct == len(ships):
             game_over_text = 'GAME OVER'
@@ -377,7 +529,7 @@ def main(is_two_player):
         else:
             for ship, exploded_ship in zip(ships, exploded_ships):
                 if not ship['collided']:
-                    ship['collided'] = ship_collided(ship=ship, asteroids=asteroids)
+                    ship['collided'] = ship_collided(ship=ship, asteroids=asteroids, alien_ships=alien_ships, alien_shots=alien_shots)
                     if ((ship['position'][0] + ship['speed']['x']) > -10) and (
                                 (ship['position'][0] + ship['speed']['x']) < 918):
                         ship['position'][0] += ship['speed']['x']
@@ -425,9 +577,9 @@ def main(is_two_player):
 
         remove_used_asteroids(asteroids)
         remove_missed_shots(shots)
+        remove_alien_shots(alien_shots)
 
         # FPS control: 30 FPS
         clock.tick(60)
-
 
 start_screen()
