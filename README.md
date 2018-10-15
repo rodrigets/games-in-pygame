@@ -4,7 +4,7 @@ Collection of games made with PyGame.
 
 ### Installation:
 
-Requires Python2
+Requires Python2 or Python3
 
 Install dependencies by running:
 >pip install -r requirements.txt
