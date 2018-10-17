@@ -9,4 +9,4 @@ Then you can run win_build.bat
 
 Thanks :)
 
-Author @marce1994
+- Author [Pablo Bianco](https://github.com/marce1994)
