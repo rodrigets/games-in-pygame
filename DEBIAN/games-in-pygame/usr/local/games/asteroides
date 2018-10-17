@@ -1,0 +1,3 @@
+#!/bin/bash
+pip install pygame
+python /usr/local/games/asteroides.py

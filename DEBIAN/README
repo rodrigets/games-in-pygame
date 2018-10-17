@@ -1,0 +1,13 @@
+How to create a .deb file
+
+Execute ./createDeb.sh to make a new games-in-pygames.deb file.
+
+You can install games-in-pygames.deb by executing
+ dpkg -i games-in-pygames.deb
+
+Afres that two new files must be places in /usr/local/games
+asteroides.py is the python code of the asteroides games
+asteroides is a shell script that executes python /usr/local/games/asteroides.py
+
+Play asteroides by writing asteroides in the shell
+user@host:~$asteroides

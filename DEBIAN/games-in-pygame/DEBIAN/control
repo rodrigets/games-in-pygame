@@ -1,0 +1,7 @@
+Package: asteriodes
+Version: 1.0.0
+Architecture: all
+Depends: python (>= 2.7.0)
+Maintainer: "Salvador Rueda" <salvador.rueda@gmail.com> 
+Description: Games in PyGame. asteroides.py
+Homepage: https://github.com/rodrigets/games-in-pygame
