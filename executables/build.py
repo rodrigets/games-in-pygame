@@ -80,7 +80,7 @@ class BuildExe:
         self.extra_scripts = []
 
         #Zip file name (None will bundle files in exe instead of zip file)
-        self.zipfile_name = none
+        self.zipfile_name = None
 
         #Dist directory
         self.dist_dir ='dist'
