@@ -125,7 +125,7 @@ def alien_shoot_laser(alien_ship):
         'surface': surf.convert_alpha(),
         'position': alien_center,
         'angle' : angle_to_target,
-        'speed': 7
+        'speed': 5
     }
 
 def move_alien_shots(alien_shots):
