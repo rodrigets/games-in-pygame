@@ -6,7 +6,6 @@ import random
 import platform
 import pygame
 import math
-import operator
 from math import sin, cos, pi, atan2
 
 RES_FOLDER = 'resources'
@@ -14,7 +13,8 @@ SCREEN_WIDTH = 956
 SCREEN_HEIGHT = 560
 FONT_SIZE = 40
 counter = 0
-counter2 =0
+counter2 = 0
+
 
 def create_ship():
     ship = {
@@ -34,6 +34,7 @@ def create_ship():
     }
     return ship
 
+
 def create_exploded_ship():
     exploded_ship = {
         'surface': pygame.image.load(
@@ -46,6 +47,7 @@ def create_exploded_ship():
         'rect': pygame.Rect(0, 0, 48, 48)
     }
     return exploded_ship
+
 
 def create_shot(spaceship):
     # load image of bullet
@@ -63,8 +65,8 @@ def create_shot(spaceship):
         'player': player,
     }
 
-def create_alien_ship(ships):
 
+def create_alien_ship(ships):
     # choose one of the ships as target for fire
     fire_target = random.choice(ships)
  
@@ -82,37 +84,38 @@ def create_alien_ship(ships):
         'ticks_to_laser': 25
     }
 
-def get_alien_ship_rotation_angle(alien_ship):
 
+def get_alien_ship_rotation_angle(alien_ship):
     # get center of alien ship
     alien_center = tuple(map(sum, zip(alien_ship['surface'].get_rect().center, tuple(alien_ship['position']))))
 
     # get center of target ship
-    target_center = tuple(map(sum, zip(alien_ship['fire_target']['surface'].get_rect().center, tuple(alien_ship['fire_target']['position']))))
+    fire_target = alien_ship['fire_target']
+    target_center = tuple(map(sum, zip(fire_target['surface'].get_rect().center, tuple(fire_target['position']))))
     
     # calculate angle between alien ship and target center
-    radiant_angle = math.atan2(target_center[0] - alien_center[0], target_center[1]- alien_center[1])
+    radiant_angle = math.atan2(target_center[0] - alien_center[0], target_center[1] - alien_center[1])
 
     # convert to degrees
-    degree_angle =  math.degrees(radiant_angle)
+    degree_angle = math.degrees(radiant_angle)
     
     # update angle on alien ship information
     alien_ship['angle'] = degree_angle
 
-    return(degree_angle)
+    return degree_angle
 
 
 def alien_shoot_laser(alien_ship):
-
     # find current position of ship center
     alien_center = list(map(sum, zip(alien_ship['surface'].get_rect().center, tuple(alien_ship['position']))))
     
     # find position of the target center
-    target_center = list(map(sum, zip(alien_ship['fire_target']['surface'].get_rect().center, tuple(alien_ship['fire_target']['position']))))
+    fire_target = alien_ship['fire_target']
+    target_center = list(map(sum, zip(fire_target['surface'].get_rect().center, tuple(fire_target['position']))))
 
     # calculate angle to target
-    x_dist =  - alien_center[0] + target_center[0]
-    y_dist =  - alien_center[1] + target_center[1]
+    x_dist = - alien_center[0] + target_center[0]
+    y_dist = - alien_center[1] + target_center[1]
     angle_to_target = (atan2(-y_dist, x_dist) % (2 * pi))
 
     # load image of alien bullet
@@ -124,14 +127,13 @@ def alien_shoot_laser(alien_ship):
     return {
         'surface': surf.convert_alpha(),
         'position': alien_center,
-        'angle' : angle_to_target,
+        'angle': angle_to_target,
         'speed': 5
     }
 
-def move_alien_shots(alien_shots):
 
+def move_alien_shots(alien_shots):
     for alien_shot in alien_shots:
-        
         alien_shot['position'][0] += cos(alien_shot['angle']) * alien_shot['speed']
         alien_shot['position'][1] -= sin(alien_shot['angle']) * alien_shot['speed']
 
@@ -150,18 +152,22 @@ def move_alien_ships(alien_ships):
     for alien_ship in alien_ships:
         alien_ship['position'][1] += alien_ship['speed']
 
+
 def remove_alien_ships(alien_ships):
     for alien_ship in alien_ships:
         if alien_ship['position'][1] > 560:
-            alien_ships.remove[alien_ship]
+            alien_ships.remove(alien_ship)
 
 
 def move_shots(shots):
     for shot in shots:
         shot['position'][1] -= shot['speed']
 
+
 def remove_missed_shots(shots):
-    # remove shots from game that leave screen
+    """
+    Remove shots from game that leave screen
+    """
     for shot in shots:
         if shot['position'][1] < 0:
             shots.remove(shot)
@@ -256,26 +262,30 @@ def create_asteroid():
         'angular_velocity': randrange(1, 10)
     }
 
-#setup music to play
-#credit: Youtuber "The Music Element" - song: "Cool Space Music"
+
 def play_music():
+    """
+    Setup music to play
+    credit: Youtuber "The Music Element" - song: "Cool Space Music"
+    """
     pygame.mixer.init()
     pygame.mixer.music.load(os.path.join(RES_FOLDER, "Cool Space Music.mp3"))
     pygame.mixer.music.play()
 
-    if (pygame.mixer.music.get_busy()==False):
+    if pygame.mixer.music.get_busy() is False:
         pygame.mixer.music.load(os.path.join(RES_FOLDER, "Cool Space Music.mp3"))
         pygame.mixer.music.play()
 
-def draw_button(screen, left, top, text):
-    BUTTON_WIDTH = 310
-    BUTTON_HEIGHT = 65
 
-    pygame.draw.line(screen,(150,150,150),[left,top],[left+BUTTON_WIDTH,top], 5)
-    pygame.draw.line(screen,(150,150,150),[left,top-2],[left,top+BUTTON_HEIGHT], 5)
-    pygame.draw.line(screen,(50,50,50),[left,top+BUTTON_HEIGHT],[left+BUTTON_WIDTH,top+BUTTON_HEIGHT], 5)
-    pygame.draw.line(screen,(50,50,50),[left+BUTTON_WIDTH,top+BUTTON_HEIGHT],[left+BUTTON_WIDTH,top], 5)
-    pygame.draw.rect(screen,(100,100,100),(left,top,BUTTON_WIDTH,BUTTON_HEIGHT))
+def draw_button(screen, left, top, text):
+    button_width = 310
+    button_height = 65
+
+    pygame.draw.line(screen, (150, 150, 150), [left, top], [left+button_width, top], 5)
+    pygame.draw.line(screen, (150, 150, 150), [left, top-2], [left, top+button_height], 5)
+    pygame.draw.line(screen, (50, 50, 50), [left, top+button_height], [left+button_width, top+button_height], 5)
+    pygame.draw.line(screen, (50, 50, 50), [left+button_width, top+button_height], [left+button_width, top], 5)
+    pygame.draw.rect(screen, (100, 100, 100), (left, top, button_width, button_height))
 
     font_name = pygame.font.get_default_font()
     start_screen_font = pygame.font.SysFont(font_name, 72)
@@ -298,20 +308,23 @@ def start_screen():
             if event.type == pygame.QUIT:
                 exit()
 
+            # noinspection PyUnusedLocal
             pressed_keys = pygame.key.get_pressed()
+            mouse_pos = pygame.mouse.get_pos()
 
-            singleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(pygame.mouse.get_pos())
-            doubleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(pygame.mouse.get_pos())
+            singleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and one_player_button.collidepoint(mouse_pos)
+            doubleplayer_selected = event.type == pygame.MOUSEBUTTONDOWN and two_player_button.collidepoint(mouse_pos)
 
             if singleplayer_selected:
                 show_start_screen = main(is_two_player=False)
                 screen.fill((0, 0, 0))
             elif doubleplayer_selected:
                 show_start_screen = main(is_two_player=True)
-                screen.fill((0,0,0))
+                screen.fill((0, 0, 0))
 
         pygame.display.update()
         clock.tick(60)
+
 
 def main(is_two_player):
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -330,7 +343,7 @@ def main(is_two_player):
     background_images = [
         os.path.join(RES_FOLDER, 'seamless_space.png'),
         os.path.join(RES_FOLDER, 'bg_big.png'),
-		os.path.join(RES_FOLDER, 'space3.jpg'),
+        os.path.join(RES_FOLDER, 'space3.jpg'),
     ]
     background_images_counter = 0
     background = pygame.image.load(
@@ -374,7 +387,7 @@ def main(is_two_player):
 
     background_position = 0
 
-    angle = 0
+    # angle = 0
 
     play_music()
 
@@ -404,14 +417,12 @@ def main(is_two_player):
 
         # shooting of alien ships
         for alien_ship in alien_ships:
-
             # check if ship can shoot again
             if alien_ship['ticks_to_laser'] > 0:
                 alien_ship['ticks_to_laser'] -= 1
             else:
                 alien_shots.append(alien_shoot_laser(alien_ship))
                 alien_ship['ticks_to_laser'] = 25
-
 
         for ship in ships:
             ship['speed'] = {
@@ -480,9 +491,7 @@ def main(is_two_player):
         shoot_asteroids(shots=shots, asteroids=asteroids)
         shoot_alien_ships(shots, alien_ships)
 
-
         score_text = "Score Player 1: " + str(counter)
-        score_text_size = game_font.size(score_text)
         t = game_font.render(score_text, True, (0, 0, 255))
         screen.blit(t, (0, 5))
 
@@ -490,13 +499,14 @@ def main(is_two_player):
             score_text2 = "Score Player 2: " + str(counter2)
             score_text_size2 = game_font.size(score_text2)
             t2 = game_font.render(score_text2, True, (255, 0, 0))
-            screen.blit(t2, (SCREEN_WIDTH - score_text_size[0] - 16, 5))
+            screen.blit(t2, (SCREEN_WIDTH - score_text_size2[0] - 16, 5))
 
         for asteroid in asteroids:
             screen.blit(rotate_center(asteroid['surface'], asteroid['angle']), asteroid['position'])
         
         for alien_ship in alien_ships:
-            screen.blit(rotate_center(alien_ship['surface'], get_alien_ship_rotation_angle(alien_ship)), alien_ship['position'])
+            alient_ship_rotation = get_alien_ship_rotation_angle(alien_ship)
+            screen.blit(rotate_center(alien_ship['surface'], alient_ship_rotation), alien_ship['position'])
 
         for shot in shots:
             screen.blit(shot['surface'], shot['position'])
@@ -529,7 +539,7 @@ def main(is_two_player):
         else:
             for ship, exploded_ship in zip(ships, exploded_ships):
                 if not ship['collided']:
-                    ship['collided'] = ship_collided(ship=ship, asteroids=asteroids, alien_ships=alien_ships, alien_shots=alien_shots)
+                    ship['collided'] = ship_collided(ship, asteroids, alien_ships, alien_shots)
                     if ((ship['position'][0] + ship['speed']['x']) > -10) and (
                                 (ship['position'][0] + ship['speed']['x']) < 918):
                         ship['position'][0] += ship['speed']['x']
@@ -581,5 +591,6 @@ def main(is_two_player):
 
         # FPS control: 30 FPS
         clock.tick(60)
+
 
 start_screen()
